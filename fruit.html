@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fruit Ninja</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Additional styles specific to the fruit page */
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 1rem;
+    }
+    #gameCanvas {
+      width: 640px;
+      height: 480px;
+      border: 2px solid var(--primary);
+      border-radius: 4px;
+      background: #000;
+    }
+    #scoreboard {
+      display: flex;
+      justify-content: space-between;
+      width: 640px;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+    #instructions {
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      text-align: center;
+      max-width: 640px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Fruit Ninja</h1>
+    <p class="subtitle">Slice the fruits using your hand! Allow webcam access when prompted.</p>
+  </header>
+
+  <main id="gameContainer">
+    <div id="scoreboard">
+      <span id="score">Score: 0</span>
+      <span id="timer">Time: 60s</span>
+    </div>
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <video id="input_video" style="display:none;"></video>
+    <p id="instructions">Keep your hand visible in the camera frame. Move your index finger across the screen to slice falling fruit. You have 60 seconds!</p>
+  </main>
+
+  <footer>
+    <p><a href="index.html" style="color: var(--primary); text-decoration:none;">&#8592; Back to menu</a></p>
+  </footer>
+
+  <!-- Import Mediapipe dependencies via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <!-- Our custom fruit game script -->
+  <script type="module" src="js/fruit.js"></script>
+</body>
+</html>

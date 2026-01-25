@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmoTrace — Expression Tracker</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Page-specific layout */
+    #container {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 1rem;
+      align-items: start;
+      margin-top: 1rem;
+      padding: 0 1rem 1.5rem;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #output_canvas {
+      width: 100%;
+      max-width: 720px;
+      aspect-ratio: 4 / 3;
+      border: 2px solid var(--primary);
+      border-radius: 10px;
+      background: #000;
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    }
+    .panel h2 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.1rem;
+    }
+    #statusLine {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin: 0.25rem 0 0.75rem 0;
+      line-height: 1.35;
+    }
+    #currentEmoji {
+      font-size: 3rem;
+      line-height: 1;
+      margin: 0.75rem 0 0.25rem 0;
+    }
+    #currentLabel {
+      font-size: 1.2rem;
+      margin: 0;
+    }
+    #confidence {
+      color: var(--text-muted);
+      margin: 0.25rem 0 0;
+      font-size: 0.95rem;
+    }
+
+    .btnrow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    button {
+      background: var(--secondary);
+      color: var(--text-light);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 0.6rem 0.4rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: transform 0.05s ease-in-out, border-color 0.15s ease-in-out;
+      user-select: none;
+    }
+    button:hover { border-color: rgba(255,255,255,0.25); }
+    button:active { transform: translateY(1px); }
+    button[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+    .smallrow {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    #progressOuter {
+      margin-top: 0.75rem;
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    #progressInner {
+      width: 0%;
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.1s linear;
+    }
+
+    #traceCanvas {
+      width: 100%;
+      height: 170px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.25);
+      margin-top: 0.75rem;
+    }
+    .legend {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.35rem 0.75rem;
+      margin-top: 0.6rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-right: 0.45rem;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 980px) {
+      #container {
+        grid-template-columns: 1fr;
+      }
+      #output_canvas {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EmoTrace — Expression Tracker</h1>
+    <p class="subtitle">A browser-based facial expression classifier using MediaPipe FaceMesh landmarks, with calibration and a live confidence trace.</p>
+  </header>
+
+  <main id="container">
+    <section>
+      <video id="input_video" style="display:none;"></video>
+      <canvas id="output_canvas" width="960" height="720"></canvas>
+    </section>
+
+    <aside class="panel">
+      <h2>Live Output</h2>
+      <p id="statusLine">Allow camera access to start. For best results: good lighting, face centered, minimal head movement.</p>
+
+      <div id="currentEmoji">🙂</div>
+      <p id="currentLabel">Neutral</p>
+      <p id="confidence">Confidence: —</p>
+
+      <canvas id="traceCanvas" width="320" height="170"></canvas>
+
+      <div class="legend">
+        <div><span class="dot" style="background:#4ade80;"></span>Happy</div>
+        <div><span class="dot" style="background:#60a5fa;"></span>Sad</div>
+        <div><span class="dot" style="background:#f87171;"></span>Angry</div>
+        <div><span class="dot" style="background:#fbbf24;"></span>Surprised</div>
+        <div><span class="dot" style="background:#e5e7eb;"></span>Neutral</div>
+      </div>
+
+      <h2 style="margin-top:1rem;">Calibration Mode</h2>
+      <p id="calibHelp" style="color: var(--text-muted); font-size: 0.9rem; margin: 0.25rem 0 0;">
+        Click an emoji below and hold that expression while it captures ~2 seconds of samples. Calibration is stored locally in your browser.
+      </p>
+
+      <div class="btnrow">
+        <button id="btnHappy" title="Calibrate Happy">🙂</button>
+        <button id="btnSad" title="Calibrate Sad">😢</button>
+        <button id="btnAngry" title="Calibrate Angry">😠</button>
+        <button id="btnSurprised" title="Calibrate Surprised">😮</button>
+        <button id="btnNeutral" title="Calibrate Neutral">😐</button>
+      </div>
+
+      <div class="smallrow">
+        <button id="btnUseHeuristics" title="Ignore calibration and use heuristics">Use heuristics</button>
+        <button id="btnReset" title="Clear calibration">Reset calibration</button>
+      </div>
+
+      <div id="progressOuter" aria-label="Calibration progress">
+        <div id="progressInner"></div>
+      </div>
+
+      <p id="ethics" style="color: var(--text-muted); font-size: 0.82rem; margin-top: 0.9rem; line-height: 1.35;">
+        Note: this is a facial expression classifier, not a definitive measure of internal emotion. Accuracy varies by lighting, pose, and individual differences.
+      </p>
+    </aside>
+  </main>
+
+  <footer>
+    <p><a href="index.html" style="color: var(--primary); text-decoration:none;">&#8592; Back to menu</a></p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+
+  <script type="module" src="js/emotions.js"></script>
+</body>
+</html>

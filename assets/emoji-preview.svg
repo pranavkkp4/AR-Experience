@@ -1,0 +1,18 @@
+
+---
+
+### `assets/emoji-preview.svg` (NEW)
+```xml
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#g)"/>
+  <rect x="70" y="80" width="660" height="440" rx="28" fill="#1f2937" stroke="#334155" stroke-width="2"/>
+  <text x="400" y="265" font-family="Arial, Helvetica, sans-serif" font-size="120" text-anchor="middle" fill="#e5e7eb">🙂</text>
+  <text x="400" y="350" font-family="Arial, Helvetica, sans-serif" font-size="42" text-anchor="middle" fill="#e5e7eb">EmoTrace</text>
+  <text x="400" y="400" font-family="Arial, Helvetica, sans-serif" font-size="20" text-anchor="middle" fill="#94a3b8">Expression Tracker</text>
+</svg>
