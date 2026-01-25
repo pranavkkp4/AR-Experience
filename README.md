@@ -1,4 +1,4 @@
-# AR Experience — EmoTrace & Fruit Ninja (MediaPipe)
+# AR Experience — EmoTrace & Fruit Catcher (MediaPipe)
 
 This repository contains a lightweight, **GitHub Pages–friendly** web app with two webcam-based demos built on **MediaPipe**:
 
