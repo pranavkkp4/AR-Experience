@@ -1,12 +1,15 @@
 # AR Experience — EmoTrace & Fruit Catcher (MediaPipe)
 
-This repository contains a lightweight, **GitHub Pages–friendly** web app with two webcam-based demos built on **MediaPipe**:
+This repository contains a lightweight, **GitHub Pages–friendly** web app with webcam-based demos built on **MediaPipe**:
 
 1. **EmoTrace — Expression Tracker (FaceMesh)**  
    Real-time facial expression classification in the browser using FaceMesh landmarks. Includes **Calibration Mode** (emoji-labeled sampling stored locally) and a **live confidence trace** over time.
 
 2. **Fruit Ninja (Hands)**  
    Slice falling fruit with your hand using real-time hand tracking.
+
+3. **Potato Run (Hands)**  
+   An infinite runner platformer where you jump a potato hero over veggie enemies.
 
 ---
 

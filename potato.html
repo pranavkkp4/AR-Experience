@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Potato Run — Veggie Platformer</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    #gameContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      padding: 0 1rem 1.5rem;
+    }
+
+    #gameCanvas {
+      width: 640px;
+      height: 480px;
+      border: 2px solid var(--primary);
+      border-radius: 6px;
+      background: #000;
+    }
+
+    #scoreboard {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5rem;
+      width: 640px;
+      font-size: 0.95rem;
+    }
+
+    .score-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--secondary);
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      text-align: center;
+    }
+
+    #instructions {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-align: center;
+      max-width: 640px;
+      margin: 0.2rem 0 0.6rem;
+    }
+
+    #leaderboard {
+      width: 640px;
+      background: var(--card-bg);
+      border: 1px solid var(--secondary);
+      border-radius: 8px;
+      padding: 0.8rem 1rem 0.6rem;
+    }
+
+    #leaderboard h3 {
+      margin: 0 0 0.5rem;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    #leaderboard ol {
+      margin: 0 0 0.25rem 1rem;
+      padding: 0;
+      color: var(--text-light);
+    }
+
+    #leaderboard small {
+      color: var(--text-muted);
+    }
+
+    #restartBtn {
+      background: var(--primary);
+      border: none;
+      color: var(--text-light);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    #restartBtn:hover {
+      opacity: 0.9;
+    }
+
+    @media (max-width: 700px) {
+      #gameCanvas,
+      #scoreboard,
+      #leaderboard {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Potato Run</h1>
+    <p class="subtitle">An infinite veggie platformer powered by your webcam.</p>
+  </header>
+
+  <main id="gameContainer">
+    <div id="scoreboard">
+      <div class="score-pill" id="score">Score: 0</div>
+      <div class="score-pill" id="best">Best: 0</div>
+      <div class="score-pill" id="globalBest">Global: --</div>
+      <div class="score-pill" id="speed">Speed: 1.0x</div>
+    </div>
+
+    <canvas id="gameCanvas" width="640" height="480"></canvas>
+    <video id="input_video" style="display:none;"></video>
+
+    <p id="instructions">
+      Raise your hand to jump and dodge incoming vegetables. Keep your hand visible to keep running.
+    </p>
+    <p id="statusLine" style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+      Allow camera access to start the run.
+    </p>
+
+    <button id="restartBtn" type="button">Restart Run</button>
+
+    <section id="leaderboard">
+      <h3>Local Leaderboard</h3>
+      <ol id="leaderboardList"></ol>
+      <small>Stored in this browser. Global score uses a lightweight shared counter.</small>
+    </section>
+  </main>
+
+  <footer>
+    <p><a href="index.html" style="color: var(--primary); text-decoration:none;">&#8592; Back to menu</a></p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+
+  <script type="module" src="js/potato.js"></script>
+</body>
+</html>
