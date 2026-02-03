@@ -11,11 +11,13 @@ const globalEl = document.getElementById('globalBest');
 const speedEl = document.getElementById('speed');
 const statusEl = document.getElementById('statusLine');
 const leaderboardList = document.getElementById('leaderboardList');
+const globalLeaderboardList = document.getElementById('globalLeaderboardList');
 const restartBtn = document.getElementById('restartBtn');
 
 const GAME_KEY = 'potatoRunnerLeaderboardV1';
-const GLOBAL_KEY = 'cat-fruit-site/potato-runner';
-const GLOBAL_BASE = 'https://api.countapi.xyz';
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : '';
 
 const groundY = 380;
 const player = {
@@ -35,7 +37,6 @@ let distance = 0;
 let gameRunning = false;
 let lastTime = 0;
 let speed = 3.2;
-let globalBest = null;
 let lastStatus = '';
 
 const enemyTypes = [
@@ -84,9 +85,12 @@ function renderLeaderboard() {
     leaderboardList.appendChild(li);
     return;
   }
-  entries.slice(0, 5).forEach((entry) => {
+  entries.slice(0, 10).forEach((entry, index) => {
     const li = document.createElement('li');
-    li.textContent = `${entry.name} — ${entry.score}`;
+    const rank = index + 1;
+    const medal = rank === 1 ? 'Gold' : rank === 2 ? 'Silver' : rank === 3 ? 'Bronze' : '';
+    const medalTag = medal ? ` (${medal})` : '';
+    li.textContent = `${rank}. ${entry.name} — ${entry.score}${medalTag}`;
     leaderboardList.appendChild(li);
   });
 }
@@ -99,45 +103,69 @@ function updateLocalBest() {
 
 function maybeAddLeaderboard(scoreValue) {
   const entries = loadLeaderboard();
-  const minScore = entries.length < 5 ? 0 : entries[entries.length - 1].score;
-  if (scoreValue <= minScore && entries.length >= 5) return;
+  const minScore = entries.length < 10 ? 0 : entries[entries.length - 1].score;
+  if (scoreValue <= minScore && entries.length >= 10) return;
 
   const nameInput = window.prompt('New high score! Enter your name (max 10 chars):', 'Potato');
   const name = (nameInput || 'Potato').trim().slice(0, 10);
   entries.push({ name: name || 'Potato', score: scoreValue });
   entries.sort((a, b) => b.score - a.score);
-  saveLeaderboard(entries.slice(0, 5));
+  saveLeaderboard(entries.slice(0, 10));
   renderLeaderboard();
   updateLocalBest();
 }
 
-async function loadGlobalBest() {
-  try {
-    const response = await fetch(`${GLOBAL_BASE}/get/${GLOBAL_KEY}`);
-    if (!response.ok) throw new Error('Global fetch failed');
-    const data = await response.json();
-    if (typeof data.value === 'number') {
-      globalBest = data.value;
-      globalEl.textContent = `Global: ${globalBest}`;
-    }
-  } catch (err) {
+function renderGlobal(entries) {
+  if (!entries || entries.length === 0) {
     globalEl.textContent = 'Global: --';
-    console.warn('Global score unavailable', err);
+    if (globalLeaderboardList) {
+      globalLeaderboardList.innerHTML = '';
+      const li = document.createElement('li');
+      li.textContent = 'No scores yet. Be the first!';
+      globalLeaderboardList.appendChild(li);
+    }
+    return;
+  }
+  globalEl.textContent = `Global: ${entries[0].score}`;
+  if (globalLeaderboardList) {
+    globalLeaderboardList.innerHTML = '';
+    entries.slice(0, 10).forEach((entry, index) => {
+      const li = document.createElement('li');
+      const rank = index + 1;
+      const medal = rank === 1 ? 'Gold' : rank === 2 ? 'Silver' : rank === 3 ? 'Bronze' : '';
+      const medalTag = medal ? ` (${medal})` : '';
+      li.textContent = `${rank}. ${entry.name} — ${entry.score}${medalTag}`;
+      globalLeaderboardList.appendChild(li);
+    });
   }
 }
 
-async function updateGlobalBest(scoreValue) {
-  if (globalBest !== null && scoreValue <= globalBest) return;
+async function loadGlobalLeaderboard() {
   try {
-    const response = await fetch(`${GLOBAL_BASE}/set/${GLOBAL_KEY}?value=${scoreValue}`);
-    if (!response.ok) throw new Error('Global set failed');
+    const response = await fetch(`${API_BASE}/api/leaderboards/potato?limit=10`);
+    if (!response.ok) throw new Error('Global fetch failed');
     const data = await response.json();
-    if (typeof data.value === 'number') {
-      globalBest = data.value;
-      globalEl.textContent = `Global: ${globalBest}`;
-    }
+    renderGlobal(data.entries || []);
+    return data.entries || [];
   } catch (err) {
-    console.warn('Unable to update global score', err);
+    renderGlobal([]);
+    return [];
+  }
+}
+
+async function submitGlobalScore(scoreValue) {
+  try {
+    const nameInput = window.prompt('New high score! Enter your name (max 12 chars):', 'Potato');
+    const name = (nameInput || 'Potato').trim().slice(0, 12) || 'Potato';
+    const response = await fetch(`${API_BASE}/api/leaderboards/potato`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score: scoreValue })
+    });
+    if (!response.ok) throw new Error('Global submit failed');
+    return loadGlobalLeaderboard();
+  } catch (err) {
+    return loadGlobalLeaderboard();
   }
 }
 
@@ -243,7 +271,40 @@ function drawBackground() {
   ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = '#2c3e50';
+  const horizon = groundY - 40;
+  const farOffset = -((distance * 0.2) % canvas.width);
+  const nearOffset = -((distance * 0.5) % canvas.width);
+
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+  ctx.fillRect(0, 0, canvas.width, horizon);
+
+  ctx.fillStyle = '#1f2937';
+  for (let i = -1; i < 3; i += 1) {
+    const baseX = farOffset + i * canvas.width;
+    ctx.beginPath();
+    ctx.moveTo(baseX, horizon);
+    ctx.quadraticCurveTo(baseX + canvas.width * 0.25, horizon - 30, baseX + canvas.width * 0.5, horizon);
+    ctx.quadraticCurveTo(baseX + canvas.width * 0.75, horizon + 20, baseX + canvas.width, horizon - 10);
+    ctx.lineTo(baseX + canvas.width, groundY + 10);
+    ctx.lineTo(baseX, groundY + 10);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#0f172a';
+  for (let i = -1; i < 3; i += 1) {
+    const baseX = nearOffset + i * canvas.width;
+    ctx.beginPath();
+    ctx.moveTo(baseX, groundY + 10);
+    ctx.quadraticCurveTo(baseX + canvas.width * 0.2, groundY - 10, baseX + canvas.width * 0.45, groundY + 10);
+    ctx.quadraticCurveTo(baseX + canvas.width * 0.7, groundY + 35, baseX + canvas.width, groundY + 10);
+    ctx.lineTo(baseX + canvas.width, canvas.height);
+    ctx.lineTo(baseX, canvas.height);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  ctx.fillStyle = '#1f2937';
   ctx.fillRect(0, groundY + 10, canvas.width, canvas.height - groundY - 10);
 
   ctx.strokeStyle = '#f1c40f';
@@ -252,11 +313,28 @@ function drawBackground() {
   ctx.moveTo(0, groundY + 10);
   ctx.lineTo(canvas.width, groundY + 10);
   ctx.stroke();
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 2;
+  const stripeOffset = -((distance * 1.5) % 60);
+  for (let x = stripeOffset; x < canvas.width; x += 60) {
+    ctx.beginPath();
+    ctx.moveTo(x, groundY + 18);
+    ctx.lineTo(x + 24, groundY + 18);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 function drawPotato() {
   ctx.save();
   ctx.translate(player.x, player.y);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(0, 6, player.w * 0.35, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   ctx.fillStyle = '#b8894a';
   ctx.beginPath();
@@ -290,6 +368,11 @@ function drawPotato() {
 function drawEnemy(enemy) {
   ctx.save();
   ctx.translate(enemy.x, enemy.y);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(enemy.w / 2, enemy.h + 6, enemy.w * 0.4, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
 
   if (enemy.type.name === 'carrot') {
     ctx.fillStyle = enemy.type.color;
@@ -370,7 +453,7 @@ function update(delta) {
       gameRunning = false;
       drawGameOver();
       maybeAddLeaderboard(score);
-      updateGlobalBest(score);
+      submitGlobalScore(score);
       return;
     }
   }
@@ -444,7 +527,7 @@ async function init() {
   setStatus('Allow camera access to start the run.');
   renderLeaderboard();
   updateLocalBest();
-  await loadGlobalBest();
+  await loadGlobalLeaderboard();
   await initHands();
   setStatus('Hand detected. Lift it to jump!');
   startGame();

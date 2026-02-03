@@ -34,6 +34,40 @@
       text-align: center;
       max-width: 640px;
     }
+
+    #leaderboard {
+      width: 640px;
+      background: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 0.8rem 1rem 0.6rem;
+      margin-top: 0.6rem;
+      box-shadow: 0 12px 26px rgba(0,0,0,0.35);
+    }
+
+    #leaderboard h3 {
+      margin: 0 0 0.5rem;
+      color: var(--primary);
+      font-size: 1.05rem;
+    }
+
+    #leaderboard ol {
+      margin: 0 0 0.25rem 1rem;
+      padding: 0;
+      color: var(--text-light);
+    }
+
+    #leaderboard small {
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 700px) {
+      #gameCanvas,
+      #scoreboard,
+      #leaderboard {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
@@ -50,6 +84,11 @@
     <canvas id="gameCanvas" width="640" height="480"></canvas>
     <video id="input_video" style="display:none;"></video>
     <p id="instructions">Keep your hand visible in the camera frame. Move your index finger across the screen to slice falling fruit. You have 60 seconds!</p>
+    <section id="leaderboard">
+      <h3>Global Top 10</h3>
+      <ol id="leaderboardList"></ol>
+      <small>Scores sync via the local leaderboard server.</small>
+    </section>
   </main>
 
   <footer>

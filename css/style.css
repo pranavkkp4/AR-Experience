@@ -1,22 +1,50 @@
 /* Global styles for the Cat & Fruit Ninja demo */
 
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Space+Grotesk:wght@400;600&display=swap');
+
 :root {
-  --dark-bg: #1b1b1b;
-  --primary: #a11020; /* dark red accent */
-  --secondary: #333333; /* dark grey secondary surfaces */
-  --text-light: #ffffff;
-  --text-muted: #cccccc;
-  --card-bg: #2a2a2a;
+  --dark-bg: #0d1117;
+  --primary: #ff7a00; /* warm orange accent */
+  --secondary: #1f2937; /* deep slate surface */
+  --text-light: #f8fafc;
+  --text-muted: #cbd5f5;
+  --card-bg: rgba(19, 27, 41, 0.85);
+  --glow: 0 0 20px rgba(255, 122, 0, 0.35);
 }
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Manrope', 'Space Grotesk', sans-serif;
   background-color: var(--dark-bg);
+  background-image:
+    radial-gradient(circle at 12% 20%, rgba(255, 122, 0, 0.18), transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(59, 130, 246, 0.18), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(16, 185, 129, 0.18), transparent 45%);
   color: var(--text-light);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(120deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.01) 45%, rgba(255, 255, 255, 0.03) 100%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.03) 0 2px, transparent 2px 14px);
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: 0;
+}
+
+header,
+main,
+footer {
+  position: relative;
+  z-index: 1;
 }
 
 header {
@@ -24,12 +52,15 @@ header {
   padding: 2rem 1rem 1rem;
   background-color: var(--secondary);
   border-bottom: 2px solid var(--primary);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.35);
 }
 
 header h1 {
   margin: 0;
   font-size: 2rem;
   color: var(--primary);
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  letter-spacing: 0.02em;
 }
 
 .subtitle {
@@ -50,22 +81,24 @@ main.options {
 
 .option-card {
   background-color: var(--card-bg);
-  border: 2px solid var(--primary);
+  border: 1px solid rgba(255, 122, 0, 0.25);
   border-radius: 8px;
   padding: 1.5rem;
   text-align: center;
   width: 240px;
   text-decoration: none;
   color: var(--text-light);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
 }
 
 .option-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 28px rgba(0,0,0,0.45);
+  border-color: rgba(255, 122, 0, 0.6);
 }
 
 .option-card .option-image {
@@ -74,12 +107,14 @@ main.options {
   object-fit: cover;
   border-radius: 4px;
   margin-bottom: 1rem;
+  box-shadow: 0 10px 18px rgba(0,0,0,0.35);
 }
 
 .option-card h2 {
   margin: 0.5rem 0 0.25rem;
   color: var(--primary);
   font-size: 1.4rem;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
 
 .option-card p {

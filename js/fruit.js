@@ -10,6 +10,11 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const timerEl = document.getElementById('timer');
+const leaderboardList = document.getElementById('leaderboardList');
+
+const API_BASE = window.location.hostname === 'localhost'
+  ? 'http://localhost:3001'
+  : '';
 
 // Game state
 let fruits = [];
@@ -174,6 +179,58 @@ function endGame() {
   ctx.font = '32px Arial';
   ctx.fillText(`Your score: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
   ctx.restore();
+
+  submitScore(score);
+}
+
+function renderLeaderboard(entries) {
+  if (!leaderboardList) return;
+  leaderboardList.innerHTML = '';
+  if (!entries || entries.length === 0) {
+    const li = document.createElement('li');
+    li.textContent = 'No scores yet. Be the first!';
+    leaderboardList.appendChild(li);
+    return;
+  }
+  entries.forEach((entry, index) => {
+    const li = document.createElement('li');
+    const rank = index + 1;
+    const medal = rank === 1 ? 'Gold' : rank === 2 ? 'Silver' : rank === 3 ? 'Bronze' : '';
+    const medalTag = medal ? ` (${medal})` : '';
+    li.textContent = `${rank}. ${entry.name} — ${entry.score}${medalTag}`;
+    leaderboardList.appendChild(li);
+  });
+}
+
+async function loadLeaderboard() {
+  if (!leaderboardList) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/leaderboards/fruit?limit=10`);
+    if (!res.ok) throw new Error('Failed leaderboard fetch');
+    const data = await res.json();
+    renderLeaderboard(data.entries || []);
+  } catch (err) {
+    renderLeaderboard([]);
+  }
+}
+
+async function submitScore(scoreValue) {
+  try {
+    const nameInput = window.prompt('Save your score! Enter a name (max 12 chars):', 'Fruit Fan');
+    const name = (nameInput || 'Fruit Fan').trim().slice(0, 12) || 'Fruit Fan';
+    const res = await fetch(`${API_BASE}/api/leaderboards/fruit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, score: scoreValue })
+    });
+    if (res.ok) {
+      await loadLeaderboard();
+    } else {
+      await loadLeaderboard();
+    }
+  } catch (err) {
+    await loadLeaderboard();
+  }
 }
 
 // Initialize everything once the page is loaded
@@ -181,6 +238,7 @@ async function init() {
   await initHands();
   startTimer();
   update();
+  loadLeaderboard();
 }
 
 init().catch((err) => {

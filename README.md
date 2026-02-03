@@ -1,15 +1,18 @@
 # AR Experience — EmoTrace & Fruit Catcher (MediaPipe)
 
-This repository contains a lightweight, **GitHub Pages–friendly** web app with webcam-based demos built on **MediaPipe**:
+This repository contains a lightweight web app with webcam-based demos built on **MediaPipe** plus a simple Node + SQLite leaderboard API:
 
 1. **EmoTrace — Expression Tracker (FaceMesh)**  
    Real-time facial expression classification in the browser using FaceMesh landmarks. Includes **Calibration Mode** (emoji-labeled sampling stored locally) and a **live confidence trace** over time.
 
-2. **Fruit Ninja (Hands)**  
-   Slice falling fruit with your hand using real-time hand tracking.
+2. **Fruit Catcher (Hands)**  
+   Catch falling fruit with your hand using real-time hand tracking.
 
 3. **Potato Run (Hands)**  
    An infinite runner platformer where you jump a potato hero over veggie enemies.
+
+4. **Global Leaderboards (React)**  
+   A small React page that displays the top scores for Fruit Catcher and Potato Run.
 
 ---
 
@@ -56,3 +59,37 @@ You can run this locally with any static server.
 ### Option B: Python
 ```bash
 python -m http.server 8000
+```
+
+## Leaderboard Backend (Node + SQLite)
+
+This project uses a small Express server with SQLite to store global leaderboards for Fruit Catcher and Potato Run.
+
+### 1) Install dependencies
+```bash
+cd server
+npm install
+```
+
+### 2) Start the API
+```bash
+npm start
+```
+
+The API runs on `http://localhost:3001` by default.
+
+### 3) Open the site
+Use Live Server or `python -m http.server 8000` and navigate to:
+- `leaderboards.html` to view scores
+- `fruit.html` or `potato.html` to play and submit scores
+
+### Admin reset (optional)
+You can clear scores with a simple admin endpoint. Set an `ADMIN_KEY` when starting the server:
+```bash
+ADMIN_KEY=yourkey npm start
+```
+
+Then call:
+- `POST /api/admin/reset/fruit?key=yourkey`
+- `POST /api/admin/reset/potato?key=yourkey`
+- `POST /api/admin/reset/all?key=yourkey`
