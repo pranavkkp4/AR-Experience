@@ -47,6 +47,7 @@ function Board({ title, data, onPrev, onNext }) {
 
 function LeaderboardsApp() {
   const [fruit, setFruit] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
+  const [flappy, setFlappy] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
   const [potato, setPotato] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
   const [status, setStatus] = useState('Loading leaderboards...');
   const [lastUpdated, setLastUpdated] = useState('');
@@ -60,8 +61,9 @@ function LeaderboardsApp() {
   const loadAll = async () => {
     setStatus('Loading leaderboards...');
     try {
-      const [fruitData, potatoData] = await Promise.all([
+      const [fruitData, flappyData, potatoData] = await Promise.all([
         loadGame('fruit', fruit.offset),
+        loadGame('flappy', flappy.offset),
         loadGame('potato', potato.offset)
       ]);
       setFruit({
@@ -69,6 +71,12 @@ function LeaderboardsApp() {
         total: fruitData.total || 0,
         limit: fruitData.limit || PAGE_SIZE,
         offset: fruitData.offset || 0
+      });
+      setFlappy({
+        entries: flappyData.entries || [],
+        total: flappyData.total || 0,
+        limit: flappyData.limit || PAGE_SIZE,
+        offset: flappyData.offset || 0
       });
       setPotato({
         entries: potatoData.entries || [],
@@ -108,6 +116,23 @@ function LeaderboardsApp() {
           const nextOffset = fruit.offset + PAGE_SIZE;
           loadGame('fruit', nextOffset).then((data) => {
             setFruit({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
+          });
+        }
+      }),
+      h(Board, {
+        key: 'flappy',
+        title: 'Flappy Bird AR',
+        data: flappy,
+        onPrev: () => {
+          const nextOffset = Math.max(flappy.offset - PAGE_SIZE, 0);
+          loadGame('flappy', nextOffset).then((data) => {
+            setFlappy({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
+          });
+        },
+        onNext: () => {
+          const nextOffset = flappy.offset + PAGE_SIZE;
+          loadGame('flappy', nextOffset).then((data) => {
+            setFlappy({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
           });
         }
       }),

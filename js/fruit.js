@@ -11,6 +11,7 @@ const ctx = canvas.getContext('2d');
 const scoreEl = document.getElementById('score');
 const timerEl = document.getElementById('timer');
 const leaderboardList = document.getElementById('leaderboardList');
+const restartBtn = document.getElementById('restartBtn');
 
 const API_BASE = window.location.hostname === 'localhost'
   ? 'http://localhost:3001'
@@ -23,6 +24,8 @@ let score = 0;
 let timeLeft = 60; // seconds
 let gameRunning = true;
 let fingerPos = null; // {x, y} coordinates of the index finger in canvas space
+let timerInterval = null;
+let animationId = null;
 
 // Preload fruit images
 const fruitSources = [
@@ -150,16 +153,20 @@ function update() {
     ctx.restore();
   }
 
-  requestAnimationFrame(update);
+  animationId = requestAnimationFrame(update);
 }
 
 // Timer countdown
 function startTimer() {
-  const interval = setInterval(() => {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+  timerInterval = setInterval(() => {
     timeLeft--;
     timerEl.textContent = `Time: ${timeLeft}s`;
     if (timeLeft <= 0) {
-      clearInterval(interval);
+      clearInterval(timerInterval);
+      timerInterval = null;
       endGame();
     }
   }, 1000);
@@ -181,6 +188,26 @@ function endGame() {
   ctx.restore();
 
   submitScore(score);
+}
+
+function resetGame() {
+  fruits = [];
+  spawnCounter = 0;
+  score = 0;
+  timeLeft = 60;
+  gameRunning = true;
+  scoreEl.textContent = 'Score: 0';
+  timerEl.textContent = 'Time: 60s';
+}
+
+function startGame() {
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+  resetGame();
+  startTimer();
+  update();
 }
 
 function renderLeaderboard(entries) {
@@ -236,11 +263,16 @@ async function submitScore(scoreValue) {
 // Initialize everything once the page is loaded
 async function init() {
   await initHands();
-  startTimer();
-  update();
+  startGame();
   loadLeaderboard();
 }
 
 init().catch((err) => {
   console.error('Error initializing Fruit Ninja game:', err);
 });
+
+if (restartBtn) {
+  restartBtn.addEventListener('click', () => {
+    startGame();
+  });
+}
