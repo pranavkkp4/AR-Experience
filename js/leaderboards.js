@@ -48,6 +48,7 @@ function Board({ title, data, onPrev, onNext }) {
 function LeaderboardsApp() {
   const [fruit, setFruit] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
   const [flappy, setFlappy] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
+  const [boxing, setBoxing] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
   const [potato, setPotato] = useState({ entries: [], total: 0, limit: PAGE_SIZE, offset: 0 });
   const [status, setStatus] = useState('Loading leaderboards...');
   const [lastUpdated, setLastUpdated] = useState('');
@@ -61,9 +62,10 @@ function LeaderboardsApp() {
   const loadAll = async () => {
     setStatus('Loading leaderboards...');
     try {
-      const [fruitData, flappyData, potatoData] = await Promise.all([
+      const [fruitData, flappyData, boxingData, potatoData] = await Promise.all([
         loadGame('fruit', fruit.offset),
         loadGame('flappy', flappy.offset),
+        loadGame('boxing', boxing.offset),
         loadGame('potato', potato.offset)
       ]);
       setFruit({
@@ -77,6 +79,12 @@ function LeaderboardsApp() {
         total: flappyData.total || 0,
         limit: flappyData.limit || PAGE_SIZE,
         offset: flappyData.offset || 0
+      });
+      setBoxing({
+        entries: boxingData.entries || [],
+        total: boxingData.total || 0,
+        limit: boxingData.limit || PAGE_SIZE,
+        offset: boxingData.offset || 0
       });
       setPotato({
         entries: potatoData.entries || [],
@@ -133,6 +141,23 @@ function LeaderboardsApp() {
           const nextOffset = flappy.offset + PAGE_SIZE;
           loadGame('flappy', nextOffset).then((data) => {
             setFlappy({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
+          });
+        }
+      }),
+      h(Board, {
+        key: 'boxing',
+        title: 'Boxing AR',
+        data: boxing,
+        onPrev: () => {
+          const nextOffset = Math.max(boxing.offset - PAGE_SIZE, 0);
+          loadGame('boxing', nextOffset).then((data) => {
+            setBoxing({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
+          });
+        },
+        onNext: () => {
+          const nextOffset = boxing.offset + PAGE_SIZE;
+          loadGame('boxing', nextOffset).then((data) => {
+            setBoxing({ entries: data.entries || [], total: data.total || 0, limit: data.limit || PAGE_SIZE, offset: data.offset || 0 });
           });
         }
       }),

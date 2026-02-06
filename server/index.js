@@ -10,7 +10,7 @@ const __dirname = dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3001;
 const dbPath = process.env.DB_PATH || join(__dirname, 'leaderboards.db');
-const allowedGames = new Set(['fruit', 'flappy', 'potato']);
+const allowedGames = new Set(['fruit', 'flappy', 'boxing', 'potato']);
 const adminKey = process.env.ADMIN_KEY || '';
 
 const db = new sqlite3.Database(dbPath);
@@ -87,17 +87,20 @@ app.get('/api/leaderboards', async (req, res) => {
   const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 5, 1), 20);
   const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
   try {
-    const [fruitEntries, flappyEntries, potatoEntries, fruitTotal, flappyTotal, potatoTotal] = await Promise.all([
+    const [fruitEntries, flappyEntries, boxingEntries, potatoEntries, fruitTotal, flappyTotal, boxingTotal, potatoTotal] = await Promise.all([
       getLeaderboard('fruit', limit, offset),
       getLeaderboard('flappy', limit, offset),
+      getLeaderboard('boxing', limit, offset),
       getLeaderboard('potato', limit, offset),
       getCount('fruit'),
       getCount('flappy'),
+      getCount('boxing'),
       getCount('potato')
     ]);
     res.json({
       fruit: { entries: fruitEntries, total: fruitTotal, limit, offset },
       flappy: { entries: flappyEntries, total: flappyTotal, limit, offset },
+      boxing: { entries: boxingEntries, total: boxingTotal, limit, offset },
       potato: { entries: potatoEntries, total: potatoTotal, limit, offset }
     });
   } catch (err) {

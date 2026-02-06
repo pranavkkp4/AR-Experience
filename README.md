@@ -14,8 +14,11 @@ This repository contains a lightweight web app with webcam-based demos built on 
 4. **Flappy Bird AR (Pose)**  
    Flap your arms to keep the bird airborne and thread the pipe gaps.
 
-5. **Global Leaderboards (React)**  
-   A small React page that displays the top scores for Fruit Catcher, Flappy Bird AR, and Potato Run.
+5. **Boxing AR (Pose)**  
+   Throw punches at glowing targets with two game modes (Combo Rush + Survival).
+
+6. **Global Leaderboards (React)**  
+   A small React page that displays the top scores for Fruit Catcher, Flappy Bird AR, Boxing AR, and Potato Run.
 
 ---
 
@@ -84,7 +87,7 @@ The API runs on `http://localhost:3001` by default.
 ### 3) Open the site
 Use Live Server or `python -m http.server 8000` and navigate to:
 - `leaderboards.html` to view scores
-- `fruit.html`, `flappy.html`, or `potato.html` to play and submit scores
+- `fruit.html`, `flappy.html`, `boxing.html`, or `potato.html` to play and submit scores
 
 ### Admin reset (optional)
 You can clear scores with a simple admin endpoint. Set an `ADMIN_KEY` when starting the server:
@@ -95,5 +98,6 @@ ADMIN_KEY=yourkey npm start
 Then call:
 - `POST /api/admin/reset/fruit?key=yourkey`
 - `POST /api/admin/reset/flappy?key=yourkey`
+- `POST /api/admin/reset/boxing?key=yourkey`
 - `POST /api/admin/reset/potato?key=yourkey`
 - `POST /api/admin/reset/all?key=yourkey`

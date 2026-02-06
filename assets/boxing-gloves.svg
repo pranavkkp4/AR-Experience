@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="480" viewBox="0 0 640 480">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0f172a"/>
+      <stop offset="1" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="glove" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#ef4444"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <circle cx="220" cy="240" r="110" fill="url(#glove)"/>
+  <circle cx="420" cy="240" r="110" fill="url(#glove)"/>
+  <rect x="160" y="290" width="120" height="70" rx="20" fill="#fb7185"/>
+  <rect x="360" y="290" width="120" height="70" rx="20" fill="#fb7185"/>
+  <path d="M90 380 Q320 300 550 380" stroke="#f59e0b" stroke-width="18" fill="none" stroke-linecap="round"/>
+  <text x="320" y="150" text-anchor="middle" font-family="'Space Grotesk', sans-serif" font-size="44" fill="#fbbf24">BOXING</text>
+</svg>
